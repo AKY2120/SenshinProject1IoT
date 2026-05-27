@@ -12,7 +12,7 @@
 
         <!-- ★ ここを修正：action="/" にする -->
         <form action="/" method="POST">
-            <select name="room_name" class="room-select" onchange="this.form.submit()">
+            <select name="room_name" class="room-select" id="room-select">
                 {% for r in rooms %}
                     <option value="{{ r }}" {% if r == room_name %}selected{% endif %}>{{ r }}</option>
                 {% endfor %}
@@ -31,17 +31,17 @@
 
                 <div class="card">
                     <h3>室温</h3>
-                    <p class="value">{{ current_room_temp }} ℃</p>
+                    <p class="value" id="temp">{{ current_room_temp }} ℃</p>
                 </div>
 
                 <div class="card">
                     <h3>湿度</h3>
-                    <p class="value">{{ current_room_humid }} %</p>
+                    <p class="value" id="humid">{{ current_room_humid }} %</p>
                 </div>
 
                 <div class="card">
                     <h3>不快指数</h3>
-                    <p class="value">{{ discomfort }}</p>
+                    <p class="value" id="discomfort">{{ discomfort }}</p>
                 </div>
 
             </div>
@@ -52,13 +52,37 @@
 
             <div class="predict-box">
                 <p>1日後の予測室温</p>
-                <p class="predict-value">{{ tomorrow_pred }}</p>
+                <p class="predict-value" id="pred">{{ tomorrow_pred }}</p>
             </div>
         </section>
 
         <footer>
             <p>© 2026 室温予測システム</p>
         </footer>
+
+        <script>
+            function updateData() {
+                const room = document.querySelector("select[name='room_name']").value;
+
+                fetch("/api/data", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body: "room_name=" + encodeURIComponent(room)
+                })
+                .then(res => res.json())
+                .then(data => {
+                    document.querySelector("#temp").textContent = data.temp + " ℃";
+                    document.querySelector("#humid").textContent = data.humid + " %";
+                    document.querySelector("#discomfort").textContent = data.discomfort;
+                    document.querySelector("#pred").textContent = data.pred;
+                });
+                
+            }
+            document.querySelector("#room-select").addEventListener("change", updateData);
+
+            // 5秒ごとに更新
+            setInterval(updateData, 5000);
+        </script>
 
     </div>
 </body>

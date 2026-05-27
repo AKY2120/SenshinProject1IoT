@@ -25,10 +25,6 @@ ROOM_LIST = [
     "Ｒ３ー３０１",
     "Ｒ３ー４０１",
     "Ｒ３ー４０３",
-    "Ｒ３ーB1Ｆ_ＥＨ",
-    "Ｒ３ー１Ｆ_ＥＨ",
-    "Ｒ３ー３Ｆ_ＥＨ",
-    "Ｒ３ー４Ｆ_ＥＨ"
 ]
 
 app = Flask(__name__)
@@ -157,6 +153,43 @@ def train_and_evaluate_model(X, Y):
 def get_discomfort(temp, humid):
     if temp is None or humid is None: return 0
     return 0.81 * temp + 0.01 * humid * (0.99 * temp - 14.3) + 46.3
+
+@app.route("/api/data", methods=["POST"])
+def api_data():
+    room_name = request.form.get("room_name")
+
+    # リアルタイムデータ取得
+    current_room_temp = None
+    current_room_humid = None
+    latest_res = requests.get(f"{LATEST_API_URL}?id={ID}&subscription-key={SUB_KEY}").json()
+
+    for device in latest_res.get('devices', []):
+        if device.get('name') == room_name:
+            current_room_temp = float(device['temperature'])
+            current_room_humid = float(device['humidity'])
+
+    if current_room_temp is None:
+        df_room_backup = pd.read_csv('annual_room_data.csv')
+        current_room_temp = df_room_backup['room_temp'].iloc[-1]
+        current_room_humid = df_room_backup['room_humid'].iloc[-1]
+
+    discomfort = get_discomfort(current_room_temp, current_room_humid)
+
+    # AI予測
+    df_out = pd.read_csv('annual_outdoor_data.csv')
+    current_outdoor_temp = df_out['outdoor_temp'].iloc[-1]
+    current_outdoor_humid = df_out['outdoor_humid'].iloc[-1]
+
+    current_data = [[current_room_temp, current_room_humid, current_outdoor_temp, current_outdoor_humid]]
+    prediction = trained_model.predict(current_data)
+    tomorrow_pred = f"{prediction[0]:.1f} ℃"
+
+    return {
+        "temp": f"{current_room_temp:.1f}",
+        "humid": f"{current_room_humid:.1f}",
+        "discomfort": f"{discomfort:.1f}",
+        "pred": tomorrow_pred
+    }
 
 @app.route("/", methods=["GET", "POST"])
 def main():
