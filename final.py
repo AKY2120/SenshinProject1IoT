@@ -104,7 +104,7 @@ def get_room_temphumid(room_name):
     output_filename = 'annual_room_data.csv'
     df_room_hourly.to_csv(output_filename, index=False)
     print(f"【成功】1年分の室温・湿度データを '{output_filename}' に保存しました。")
-    return 'annual_room_data.csv'
+    return output_filename
 
 # 2つのCSVファイルを1つにマージ
 def load_and_merge_data(room_csv, outdoor_csv):
