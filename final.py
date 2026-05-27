@@ -2,7 +2,7 @@
 import requests
 import time
 import csv
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 import pandas as pd
 from datetime import datetime, timedelta
 from sklearn.ensemble import RandomForestRegressor
@@ -21,7 +21,15 @@ weather_url = f"https://archive-api.open-meteo.com/v1/archive?latitude=35.1351&l
 LATEST_API_URL = 'https://airoco.necolico.jp/data-api/latest'
 ID = 'CgETViZ2'
 SUB_KEY = '6b8aa7133ece423c836c38af01c59880'
-ROOM_NAME = 'Ｒ３ー４０３'
+ROOM_LIST = [
+    "Ｒ３ー３０１",
+    "Ｒ３ー４０１",
+    "Ｒ３ー４０３",
+    "Ｒ３ーB1Ｆ_ＥＨ",
+    "Ｒ３ー１Ｆ_ＥＨ",
+    "Ｒ３ー３Ｆ_ＥＨ",
+    "Ｒ３ー４Ｆ_ＥＨ"
+]
 
 app = Flask(__name__)
 
@@ -45,7 +53,7 @@ def get_outdoor_temphumid():
     return 'annual_outdoor_data.csv'
 
 # 室内の気温と湿度を取得しCSVファイルに保存
-def get_room_temphumid():
+def get_room_temphumid(room_name):
     room_records = []
     print("ネコリコAPIから1年分の室温・湿度データを取得中")
     
@@ -68,7 +76,7 @@ def get_room_temphumid():
                 if not row or row[0] == "date" or "日時" in row[0]:
                     continue
                     
-                if row[1] == ROOM_NAME:
+                if row[1] == room_name:
                     try:
                         dt = datetime.strptime(row[0], "%Y/%m/%d %H:%M:%S")
                         dt_clipped = dt.replace(second=0) 
@@ -150,58 +158,63 @@ def get_discomfort(temp, humid):
     if temp is None or humid is None: return 0
     return 0.81 * temp + 0.01 * humid * (0.99 * temp - 14.3) + 46.3
 
-@app.route("/")
+@app.route("/", methods=["GET", "POST"])
 def main():
     global trained_model
-    
+
+    # 部屋選択
+    if request.method == "POST":
+        room_name = request.form.get("room_name")
+    else:
+        room_name = ROOM_LIST[0]
+
+    # リアルタイムデータ取得
     current_room_temp = None
     current_room_humid = None
     try:
         latest_res = requests.get(f"{LATEST_API_URL}?id={ID}&subscription-key={SUB_KEY}").json()
-        # ネコリコのリアルタイムAPIレスポンスから現在の温度と湿度を取り出す
         for device in latest_res.get('devices', []):
-            if device.get('name') == ROOM_NAME:
+            if device.get('name') == room_name:
                 current_room_temp = float(device['temperature'])
                 current_room_humid = float(device['humidity'])
-    except Exception as e:
-        print(f"リアルタイムデータの取得に失敗: {e}")
+    except:
+        pass
 
-    # 万が一リアルタイムAPIが失敗した場合は、CSVの最終行（昨日データ）をバックアップにする
+    # バックアップ
     if current_room_temp is None:
         df_room_backup = pd.read_csv('annual_room_data.csv')
         current_room_temp = df_room_backup['room_temp'].iloc[-1]
         current_room_humid = df_room_backup['room_humid'].iloc[-1]
-    
-    # リアルタイムの不快指数計算
+
     discomfort = get_discomfort(current_room_temp, current_room_humid)
-    
-    # 学習したAIモデルを使って「1日後の室温」を予測
+
+    # AI予測
     tomorrow_pred_text = "予測不可"
     if trained_model is not None:
-        # 最新の「屋外」データをCSVから取得
         df_out = pd.read_csv('annual_outdoor_data.csv')
         current_outdoor_temp = df_out['outdoor_temp'].iloc[-1]
         current_outdoor_humid = df_out['outdoor_humid'].iloc[-1]
-        
-        # 完全にリアルタイムな室内の値と、直近の屋外の値をセットにして予測
+
         current_data = [[current_room_temp, current_room_humid, current_outdoor_temp, current_outdoor_humid]]
         prediction = trained_model.predict(current_data)
         tomorrow_pred_text = f"{prediction[0]:.1f} ℃"
 
     return render_template(
-    "index.html",
-    room_name=ROOM_NAME,
-    current_room_temp=f"{current_room_temp:.1f}",
-    current_room_humid=f"{current_room_humid:.1f}",
-    discomfort=f"{discomfort:.1f}",
-    tomorrow_pred=tomorrow_pred_text
-)
+        "index.html",
+        rooms=ROOM_LIST,
+        room_name=room_name,
+        current_room_temp=f"{current_room_temp:.1f}",
+        current_room_humid=f"{current_room_humid:.1f}",
+        discomfort=f"{discomfort:.1f}",
+        tomorrow_pred=tomorrow_pred_text
+    )
+
 
 
 if __name__ == "__main__":
     print("--- システム初期化・AI学習フェーズ ---")
     outdoor_file = get_outdoor_temphumid()
-    room_file = get_room_temphumid()
+    room_file = get_room_temphumid(ROOM_LIST[0])
     
     # 取得したCSVファイルをマージして学習
     merged_df = load_and_merge_data(room_file, outdoor_file)

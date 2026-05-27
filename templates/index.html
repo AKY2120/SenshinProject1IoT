@@ -8,7 +8,17 @@
 
 <body>
     <div class="container">
+        <h1>部屋を選択してください</h1>
 
+        <!-- ★ ここを修正：action="/" にする -->
+        <form action="/" method="POST">
+            <select name="room_name" class="room-select" onchange="this.form.submit()">
+                {% for r in rooms %}
+                    <option value="{{ r }}" {% if r == room_name %}selected{% endif %}>{{ r }}</option>
+                {% endfor %}
+            </select>
+        </form>
+        
         <header>
             <h1>環境計測・室温予測モニター</h1>
             <p class="room-name">現在の計測部屋：<strong>{{ room_name }}</strong></p>
