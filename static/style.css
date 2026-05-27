@@ -1,0 +1,85 @@
+body {
+    font-family: "Hiragino Sans", "Noto Sans JP", sans-serif;
+    background: #f5f7fa;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    width: 90%;
+    max-width: 900px;
+    margin: 40px auto;
+}
+
+header h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.room-name {
+    text-align: center;
+    color: #666;
+    margin-bottom: 30px;
+}
+
+h2 {
+    color: #444;
+    border-left: 6px solid #4a90e2;
+    padding-left: 10px;
+    margin-bottom: 15px;
+}
+
+.card-grid {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.card {
+    flex: 1;
+    min-width: 150px;
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.card h3 {
+    margin: 0;
+    color: #555;
+}
+
+.value {
+    font-size: 28px;
+    font-weight: bold;
+    margin-top: 10px;
+    color: #222;
+}
+
+.predict-section {
+    margin-top: 40px;
+}
+
+.predict-box {
+    background: #fff4f4;
+    border-left: 6px solid #e74c3c;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.predict-value {
+    font-size: 32px;
+    font-weight: bold;
+    color: #e74c3c;
+    margin-top: 10px;
+}
+
+footer {
+    text-align: center;
+    margin-top: 40px;
+    color: #888;
+    font-size: 14px;
+}

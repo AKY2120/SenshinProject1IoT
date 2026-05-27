@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>環境計測・室温予測モニター</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <div class="container">
+
+        <header>
+            <h1>環境計測・室温予測モニター</h1>
+            <p class="room-name">現在の計測部屋：<strong>{{ room_name }}</strong></p>
+        </header>
+
+        <section class="current-section">
+            <h2>現在の環境データ</h2>
+
+            <div class="card-grid">
+
+                <div class="card">
+                    <h3>室温</h3>
+                    <p class="value">{{ current_room_temp }} ℃</p>
+                </div>
+
+                <div class="card">
+                    <h3>湿度</h3>
+                    <p class="value">{{ current_room_humid }} %</p>
+                </div>
+
+                <div class="card">
+                    <h3>不快指数</h3>
+                    <p class="value">{{ discomfort }}</p>
+                </div>
+
+            </div>
+        </section>
+
+        <section class="predict-section">
+            <h2>AI予測（1日後）</h2>
+
+            <div class="predict-box">
+                <p>1日後の予測室温</p>
+                <p class="predict-value">{{ tomorrow_pred }}</p>
+            </div>
+        </section>
+
+        <footer>
+            <p>© 2026 室温予測システム</p>
+        </footer>
+
+    </div>
+</body>
+</html>

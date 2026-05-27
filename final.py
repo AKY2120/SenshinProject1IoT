@@ -2,7 +2,7 @@
 import requests
 import time
 import csv
-from flask import Flask, render_template_string
+from flask import Flask, render_template
 import pandas as pd
 from datetime import datetime, timedelta
 from sklearn.ensemble import RandomForestRegressor
@@ -188,22 +188,15 @@ def main():
         prediction = trained_model.predict(current_data)
         tomorrow_pred_text = f"{prediction[0]:.1f} ℃"
 
-    # ブラウザ表示用HTML
-    html_content = f"""
-    <html>
-        <body style="font-family: sans-serif; margin: 40px;">
-            <h1>環境計測・室温予測モニター</h1>
-            <p>現在の計測部屋： <strong>{ROOM_NAME}</strong></p>
-            <p>現在の室温： <strong>{current_room_temp:.1f} ℃</strong></p>
-            <p>現在の室内湿度： <strong>{current_room_humid:.1f} %</strong></p>
-            <p>現在の不快指数： <strong>{discomfort:.1f}</strong></p>
-            <hr>
-            <h2>AI予測（1日後）</h2>
-            <p>1日後の予測室温： <span style="color: red; font-size: 24px; font-weight: bold;">{tomorrow_pred_text}</span></p>
-        </body>
-    </html>
-    """
-    return render_template_string(html_content)
+    return render_template(
+    "index.html",
+    room_name=ROOM_NAME,
+    current_room_temp=f"{current_room_temp:.1f}",
+    current_room_humid=f"{current_room_humid:.1f}",
+    discomfort=f"{discomfort:.1f}",
+    tomorrow_pred=tomorrow_pred_text
+)
+
 
 if __name__ == "__main__":
     print("--- システム初期化・AI学習フェーズ ---")
