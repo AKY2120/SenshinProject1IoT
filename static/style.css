@@ -17,10 +17,36 @@ header h1 {
     margin-bottom: 5px;
 }
 
+#current-room {
+    font-size: 20px;
+    color: #000000;
+}
+
+.room-select {
+    font-size: 20px; 
+    padding: 12px 24px; 
+    width: 100%; 
+    max-width: 400px;
+    border: 2px solid #ffffff;
+    border-radius: 6px;
+    background-color: #ffffff;
+    color: #333333;
+    cursor: pointer;
+    font-weight: bold;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.room-select:hover, .room-select:focus {
+    border-color: #2980b9; 
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    outline: none;
+}
+
 .room-name {
     text-align: center;
-    color: #666;
-    margin-bottom: 30px;
+    color: #000000;
+    margin-bottom: 40px;
 }
 
 h2 {

@@ -2,13 +2,19 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>環境計測・室温予測モニター</title>
+    <title>室温・湿度の計測と明日の気温予測</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
 <body>
     <div class="container">
-        <h1>部屋を選択してください</h1>
+        
+        <header>
+            <h1>室温・湿度の計測と明日の気温予測</h1>
+            <p class="room-name">現在の計測部屋：<strong id="current-room">{{ room_name }}</strong></p>
+        </header>
+        
+        <h1>部屋を選択</h1>
 
         <form action="/" method="POST" id="room-form">
             <select name="room_name" class="room-select" id="room-select">
@@ -17,11 +23,6 @@
                 {% endfor %}
             </select>
         </form>
-        
-        <header>
-            <h1>環境計測・室温予測モニター</h1>
-            <p class="room-name">現在の計測部屋：<strong id="current-room">{{ room_name }}</strong></p>
-        </header>
 
         <section class="current-section">
             <h2>現在の環境データ</h2>
@@ -45,7 +46,7 @@
         </section>
 
         <section class="predict-section">
-            <h2>AI予測（1日後）</h2>
+            <h2>AIによる明日の気温予測</h2>
 
             <div class="predict-box">
                 <p>1日後の予測室温</p>
