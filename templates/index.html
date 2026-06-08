@@ -76,7 +76,7 @@
                     document.querySelector("#discomfort").textContent = data.discomfort;
                     document.querySelector("#pred").textContent = data.pred;
                     
-                    // ★【修正】「現在の計測部屋」のテキストも、選択された部屋名に書き換える
+                    //「現在の計測部屋」のテキストも、選択された部屋名に書き換える
                     document.querySelector("#current-room").textContent = room;
                 })
                 .catch(err => console.error("データ取得エラー:", err));
